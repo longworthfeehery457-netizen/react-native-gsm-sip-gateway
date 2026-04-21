@@ -180,4 +180,5 @@ yarn android
 ---
 
 ## Acknowledgments
-🙏 Special thanks to the contributors and the open-source community for making this project possible.
+🙏 Special thanks to the contributors and the open-source community for making this project possible...
+
