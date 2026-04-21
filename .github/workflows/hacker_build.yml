@@ -5,22 +5,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Manual Structure Fix
+      - name: Checkout and Prepare
         run: |
-          # 1. Глобальная подмена SSH на HTTPS (ИСПРАВЛЕНО)
+          # 1. Подменяем SSH на HTTPS
           git config --global url."https://github.com/".insteadOf git@github.com:
           git config --global url."https://github.com/".insteadOf ssh://git@github.com/
 
-          # 2. Создаем чистую папку common
-          mkdir -p ${{ github.workspace }}/common
-          cd ${{ github.workspace }}/common
+          # 2. Клонируем приложение прямо в текущую папку
+          git clone https://github.com/telon-org/telon-gsm-sip-gateway.git .
           
-          # 3. Клонируем приложение и библиотеки
-          git clone https://github.com/telon-org/telon-gsm-sip-gateway.git app
-          mv app/* .
-          mv app/.* . 2>/dev/null || true
-          rm -rf app
-          
+          # 3. Клонируем библиотеки на уровень выше, как они и прописаны в проекте
+          cd ..
           git clone https://github.com/telon-org/react-native-tele.git
           git clone https://github.com/telon-org/react-native-sip2.git
           git clone https://github.com/telon-org/react-native-replace-dialer.git
@@ -38,15 +33,13 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          cd ${{ github.workspace }}/common/telon-gateway-app
-          # Подменяем ссылки и здесь для надежности
-          git config --global url."https://github.com/".insteadOf ssh://git@github.com/
-          rm -f package-lock.json
+          # Мы уже в нужной папке (благодаря клонированию через ".")
+          cd telon-gateway-app
           yarn install
 
       - name: Build Android Release APK
         run: |
-          cd ${{ github.workspace }}/common/telon-gateway-app/android
+          cd telon-gateway-app/android
           chmod +x gradlew
           ./gradlew assembleRelease
 
@@ -54,4 +47,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Telon-Final-APK
-          path: ${{ github.workspace }}/common/telon-gateway-app/android/app/build/outputs/apk/release/*.apk
+          path: telon-gateway-app/android/app/build/outputs/apk/release/*.apk
