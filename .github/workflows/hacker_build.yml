@@ -5,20 +5,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Manual Clone with No Nesting
+      - name: Manual Structure Fix
         run: |
-          # Создаем чистую папку common
+          # 1. Создаем чистую папку common
           mkdir -p ${{ github.workspace }}/common
           cd ${{ github.workspace }}/common
           
-          # Клонируем библиотеки
+          # 2. Клонируем приложение в папку "app"
+          git clone https://github.com/telon-org/telon-gsm-sip-gateway.git app
+          
+          # 3. Переносим всё из "app" на уровень выше (в common)
+          mv app/* .
+          mv app/.* . 2>/dev/null || true
+          rm -rf app
+          
+          # 4. Теперь клонируем библиотеки рядом (теперь они будут соседями)
           git clone https://github.com/telon-org/react-native-tele.git
           git clone https://github.com/telon-org/react-native-sip2.git
           git clone https://github.com/telon-org/react-native-replace-dialer.git
-          
-          # Клонируем САМО ПРИЛОЖЕНИЕ прямо в текущую папку (через точку)
-          # Это предотвратит создание лишней папки telon-gsm-sip-gateway
-          git clone https://github.com/telon-org/telon-gsm-sip-gateway.git .
 
       - name: setup JDK 17
         uses: actions/setup-java@v4
@@ -33,7 +37,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          # Теперь путь будет идеально плоским, как и хочет проект
+          # Теперь структура плоская, как и требовалось
           cd ${{ github.workspace }}/common/telon-gateway-app
           rm -f package-lock.json
           yarn install
