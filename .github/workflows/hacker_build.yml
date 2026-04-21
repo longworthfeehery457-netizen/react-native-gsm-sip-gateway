@@ -5,17 +5,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Clone All Repositories
+      - name: Checkout main repo
+        uses: actions/checkout@v4
+        with:
+          path: telon-gsm-sip-gateway
+
+      - name: Clone Libraries to Root
         run: |
-          # Клонируем библиотеки во временную папку, чтобы потом разложить правильно
+          # Клонируем библиотеки прямо в домашнюю директорию раннера
           git clone https://github.com/telon-org/react-native-tele.git
           git clone https://github.com/telon-org/react-native-sip2.git
           git clone https://github.com/telon-org/react-native-replace-dialer.git
-          
-          # Клонируем само приложение
-          git clone https://github.com/telon-org/telon-gsm-sip-gateway.git main_app
 
-      - name: setup JDK 17
+      - name: set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
@@ -29,14 +31,15 @@ jobs:
       - name: Install Dependencies
         run: |
           # Заходим в папку приложения
-          cd main_app/telon-gateway-app
-          # Удаляем замок и запускаем установку
+          cd telon-gsm-sip-gateway/telon-gateway-app
+          # Удаляем замок
           rm -f package-lock.json
+          # Пробуем установить
           yarn install
 
       - name: Build Android Release APK
         run: |
-          cd main_app/telon-gateway-app/android
+          cd telon-gsm-sip-gateway/telon-gateway-app/android
           chmod +x gradlew
           ./gradlew assembleRelease
 
@@ -44,4 +47,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Telon-Final-APK
-          path: main_app/telon-gateway-app/android/app/build/outputs/apk/release/*.apk
+          path: telon-gsm-sip-gateway/telon-gateway-app/android/app/build/outputs/apk/release/*.apk
