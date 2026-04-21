@@ -5,12 +5,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Prepare Workspace
+      - name: Force Structure
         run: |
-          # Создаем чистую папку для работы
-          mkdir -p workdir
-          cd workdir
-          # Клонируем всё в одну папку рядом
+          # Создаем папку в корне, чтобы не зависеть от имен Гитхаба
+          sudo mkdir -p /common-folder
+          sudo chmod 777 /common-folder
+          cd /common-folder
+          
+          # Клонируем всё строго в одну кучу
           git clone https://github.com/telon-org/telon-gsm-sip-gateway.git
           git clone https://github.com/telon-org/react-native-tele.git
           git clone https://github.com/telon-org/react-native-sip2.git
@@ -29,14 +31,14 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          # Заходим в папку приложения через нашу новую структуру
-          cd workdir/telon-gsm-sip-gateway/telon-gateway-app
+          cd /common-folder/telon-gsm-sip-gateway/telon-gateway-app
+          # Удаляем файл-замок и ставим зависимости
           rm -f package-lock.json
           yarn install
 
       - name: Build Android Release APK
         run: |
-          cd workdir/telon-gsm-sip-gateway/telon-gateway-app/android
+          cd /common-folder/telon-gsm-sip-gateway/telon-gateway-app/android
           chmod +x gradlew
           ./gradlew assembleRelease
 
@@ -44,4 +46,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Telon-Final-APK
-          path: workdir/telon-gsm-sip-gateway/telon-gateway-app/android/app/build/outputs/apk/release/*.apk
+          path: /common-folder/telon-gsm-sip-gateway/telon-gateway-app/android/app/build/outputs/apk/release/*.apk
