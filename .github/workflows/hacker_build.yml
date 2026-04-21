@@ -5,20 +5,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Force Structure
+      - name: Force Flat Structure
         run: |
-          # Создаем папку в корне, чтобы не зависеть от имен Гитхаба
-          sudo mkdir -p /common-folder
-          sudo chmod 777 /common-folder
-          cd /common-folder
+          # Создаем общую папку
+          mkdir -p /home/runner/work/common
+          cd /home/runner/work/common
           
-          # Клонируем всё строго в одну кучу
-          git clone https://github.com/telon-org/telon-gsm-sip-gateway.git
+          # Клонируем библиотеки
           git clone https://github.com/telon-org/react-native-tele.git
           git clone https://github.com/telon-org/react-native-sip2.git
           git clone https://github.com/telon-org/react-native-replace-dialer.git
+          
+          # Клонируем само приложение прямо в корень common (без подпапки)
+          git clone https://github.com/telon-org/telon-gsm-sip-gateway.git .
 
-      - name: set up JDK 17
+      - name: setup JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
@@ -31,14 +32,14 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          cd /common-folder/telon-gsm-sip-gateway/telon-gateway-app
-          # Удаляем файл-замок и ставим зависимости
+          # Теперь заходим в папку приложения, которая в корне common
+          cd /home/runner/work/common/telon-gateway-app
           rm -f package-lock.json
           yarn install
 
       - name: Build Android Release APK
         run: |
-          cd /common-folder/telon-gsm-sip-gateway/telon-gateway-app/android
+          cd /home/runner/work/common/telon-gateway-app/android
           chmod +x gradlew
           ./gradlew assembleRelease
 
@@ -46,4 +47,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Telon-Final-APK
-          path: /common-folder/telon-gsm-sip-gateway/telon-gateway-app/android/app/build/outputs/apk/release/*.apk
+          path: /home/runner/work/common/telon-gateway-app/android/app/build/outputs/apk/release/*.apk
