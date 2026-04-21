@@ -5,17 +5,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Prepare Workspace
+      - name: Clone Everything
         run: |
-          # Создаем общую родительскую папку
-          mkdir -p ${{ github.workspace }}/telon_project
-          cd ${{ github.workspace }}/telon_project
-          
-          # Клонируем всё ПО ОТДЕЛЬНОСТИ в эту папку
+          # Клонируем всё в текущую папку
+          git clone https://github.com/telon-org/telon-gsm-sip-gateway.git
           git clone https://github.com/telon-org/react-native-tele.git
           git clone https://github.com/telon-org/react-native-sip2.git
           git clone https://github.com/telon-org/react-native-replace-dialer.git
-          git clone https://github.com/telon-org/telon-gsm-sip-gateway.git main_app
 
       - name: setup JDK 17
         uses: actions/setup-java@v4
@@ -26,18 +22,20 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install Dependencies
         run: |
-          # Заходим в папку приложения через main_app
-          cd ${{ github.workspace }}/telon_project/main_app/telon-gateway-app
+          # Заходим в папку, где лежит package.json
+          cd telon-gsm-sip-gateway/telon-gateway-app
+          # Убираем старый замок
           rm -f package-lock.json
+          # Устанавливаем зависимости
           yarn install
 
       - name: Build Android Release APK
         run: |
-          cd ${{ github.workspace }}/telon_project/main_app/telon-gateway-app/android
+          cd telon-gsm-sip-gateway/telon-gateway-app/android
           chmod +x gradlew
           ./gradlew assembleRelease
 
@@ -45,4 +43,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Telon-Final-APK
-          path: ${{ github.workspace }}/telon_project/main_app/telon-gateway-app/android/app/build/outputs/apk/release/*.apk
+          path: telon-gsm-sip-gateway/telon-gateway-app/android/app/build/outputs/apk/release/*.apk
