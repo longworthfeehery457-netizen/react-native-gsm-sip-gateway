@@ -7,9 +7,9 @@ jobs:
     steps:
       - name: Manual Structure Fix
         run: |
-          # 1. Глобальная подмена SSH на HTTPS (лечит ошибку Permission Denied)
+          # 1. Глобальная подмена SSH на HTTPS (ИСПРАВЛЕНО)
           git config --global url."https://github.com/".insteadOf git@github.com:
-          git clone --global url."https://github.com/".insteadOf ssh://git@github.com/
+          git config --global url."https://github.com/".insteadOf ssh://git@github.com/
 
           # 2. Создаем чистую папку common
           mkdir -p ${{ github.workspace }}/common
@@ -39,7 +39,7 @@ jobs:
       - name: Install Dependencies
         run: |
           cd ${{ github.workspace }}/common/telon-gateway-app
-          # Еще раз подменяем ссылки прямо перед установкой на всякий случай
+          # Подменяем ссылки и здесь для надежности
           git config --global url."https://github.com/".insteadOf ssh://git@github.com/
           rm -f package-lock.json
           yarn install
