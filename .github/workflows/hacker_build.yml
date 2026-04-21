@@ -5,10 +5,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Environment and Clone All
+      - name: Clone All Repositories
         run: |
-          mkdir common-folder
-          cd common-folder
+          # Клонируем всё в корень рабочей папки робота
           git clone https://github.com/telon-org/telon-gsm-sip-gateway.git
           git clone https://github.com/telon-org/react-native-tele.git
           git clone https://github.com/telon-org/react-native-sip2.git
@@ -25,14 +24,17 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install Dependencies (Yarn)
+      - name: Install Dependencies
         run: |
-          cd common-folder/telon-gsm-sip-gateway/telon-gateway-app
+          # Заходим именно в папку приложения
+          cd telon-gsm-sip-gateway/telon-gateway-app
+          # Удаляем старый замок, если он мешает
+          rm -f package-lock.json
           yarn install
 
       - name: Build Android Release APK
         run: |
-          cd common-folder/telon-gsm-sip-gateway/telon-gateway-app/android
+          cd telon-gsm-sip-gateway/telon-gateway-app/android
           chmod +x gradlew
           ./gradlew assembleRelease
 
@@ -40,4 +42,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Telon-Final-APK
-          path: common-folder/telon-gsm-sip-gateway/telon-gateway-app/android/app/build/outputs/apk/release/*.apk
+          path: telon-gsm-sip-gateway/telon-gateway-app/android/app/build/outputs/apk/release/*.apk
